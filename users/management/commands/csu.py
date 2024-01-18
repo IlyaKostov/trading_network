@@ -10,13 +10,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         user = User.objects.create(
-            email='kenaa@example.com',
-            # email=os.getenv('SUPERUSER_EMAIL'),
+            email=os.getenv('SUPERUSER_EMAIL'),
             first_name='admin',
             is_staff=True,
             is_active=True,
             is_superuser=True,
         )
-        # user.set_password(os.getenv('SUPERUSER_PASSWORD'))
-        user.set_password('123')
+        user.set_password(os.getenv('SUPERUSER_PASSWORD'))
         user.save()
