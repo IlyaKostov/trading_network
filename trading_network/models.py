@@ -29,7 +29,7 @@ class Link(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название', unique=True)
     level = models.PositiveSmallIntegerField(verbose_name='Уровень звена')
 
-    products = models.ManyToManyField(Product, verbose_name='Продукты', **NULLABLE)
+    products = models.ManyToManyField(Product, verbose_name='Продукты')
 
     debt = models.DecimalField(max_digits=20, decimal_places=2, verbose_name='Задолженность перед поставщиком',
                                **NULLABLE)
@@ -51,10 +51,6 @@ class Link(models.Model):
         return depth
 
     def clean(self):
-        if self.status_link == 'factory' and (self.supplier is not None or self.debt is not None):
-            raise ValidationError('У завода не может быть Поставщика / Задолженности перед поставщиком')
-        if self.supplier is None and self.status_link != 'factory':
-            raise ValidationError('Без поставщика может быть только Завод')
         depth = self.calculate_depth()
         if depth > 2:
             raise ValidationError('Иерархическая структура не может состоять более чем из 3 уровней')
