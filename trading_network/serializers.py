@@ -1,14 +1,8 @@
 from rest_framework import serializers
 
+from trading_network.mixins import RepresentationMixin
 from trading_network.models import Link, Contact, Product
 from trading_network.validators import ProductSupplierRelationshipValidator, StatusLinkSupplierValidator
-
-
-class RepresentationMixin:
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['status_link'] = instance.get_status_link_display()
-        return representation
 
 
 class ContactSerializer(serializers.ModelSerializer):
