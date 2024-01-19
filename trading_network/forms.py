@@ -31,4 +31,6 @@ class LinkAdminForm(forms.ModelForm):
                     )
                     % (', '.join(products), supplier.name)
                 )
+        if supplier.level == 2:
+            raise forms.ValidationError('Иерархическая структура не может состоять более чем из 3 уровней')
         return cleaned_data

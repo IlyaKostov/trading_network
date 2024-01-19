@@ -21,7 +21,7 @@ class Product(models.Model):
 class Link(models.Model):
     class LinkStatus(models.TextChoices):
         FACTORY = 'factory', 'Завод'
-        RETAIL_NETWORK = 'retail network', 'Розничная сеть'
+        RETAIL_NETWORK = 'retail_network', 'Розничная сеть'
         ENTREPRENEUR = 'entrepreneur', 'Индивидуальный предприниматель'
 
     status_link = models.CharField(max_length=30, choices=LinkStatus.choices, verbose_name='звено сети')
@@ -49,12 +49,6 @@ class Link(models.Model):
             depth += 1
             parent = parent.supplier
         return depth
-
-    def clean(self):
-        depth = self.calculate_depth()
-        if depth > 2:
-            raise ValidationError('Иерархическая структура не может состоять более чем из 3 уровней')
-        super().clean()
 
     class Meta:
         verbose_name = 'Торговое звено'

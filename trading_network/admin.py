@@ -62,7 +62,7 @@ class ProductAdmin(admin.ModelAdmin):
     def supplier_list(self, obj):
         return ', '.join([link.name for link in obj.link_set.all()])
 
-    supplier_list.short_description = 'Список поставщиков'
+    supplier_list.short_description = 'Список поставщиков использующих продукт'
 
 
 @admin.register(Contact)
