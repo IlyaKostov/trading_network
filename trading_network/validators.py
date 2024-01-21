@@ -3,16 +3,14 @@ from rest_framework import serializers
 
 
 class StatusLinkSupplierValidator:
-    """Валидация установки поставщика и задолженности для завода"""
-    def __init__(self, status, supplier, debt):
+    """Валидация установки поставщика и иерархической структуры"""
+    def __init__(self, status, supplier):
         self.status = status
         self.supplier = supplier
-        self.debt = debt
 
     def __call__(self, attrs):
         status_link_ = attrs.get(self.status)
         supplier_ = attrs.get(self.supplier)
-        debt_ = attrs.get(self.debt)
         if status_link_ == 'factory' and supplier_:
             raise serializers.ValidationError('У завода не может быть Поставщика')
         if supplier_ is None and (status_link_ != 'factory' and status_link_):

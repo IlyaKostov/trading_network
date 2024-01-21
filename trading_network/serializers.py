@@ -6,26 +6,28 @@ from trading_network.validators import ProductSupplierRelationshipValidator, Sta
 
 
 class ContactSerializer(serializers.ModelSerializer):
+    """Сериализатор контактов"""
     class Meta:
         model = Contact
         exclude = ('link',)
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """Сериализатор продуктов"""
     class Meta:
         model = Product
         fields = '__all__'
 
 
 class LinkSerializer(RepresentationMixin, serializers.ModelSerializer):
-    """Сериализатор привычек"""
+    """Сериализатор на запись торговых звеньев"""
     contact = ContactSerializer(required=True, many=True, source='contact_set')
 
     class Meta:
         model = Link
         fields = ['id', 'status_link', 'supplier', 'name', 'level', 'products', 'debt', 'contact']
         read_only_fields = ['debt', 'level']
-        validators = [StatusLinkSupplierValidator('status_link', 'supplier', 'debt'),
+        validators = [StatusLinkSupplierValidator('status_link', 'supplier'),
                       ProductSupplierRelationshipValidator('supplier', 'products')]
 
     def create(self, validated_data):
@@ -64,7 +66,7 @@ class LinkSerializer(RepresentationMixin, serializers.ModelSerializer):
 
 
 class LinkReadSerializer(RepresentationMixin, serializers.ModelSerializer):
-    """Сериализатор привычек"""
+    """Сериализатор на чтение торговых звеньев"""
     contact = ContactSerializer(many=True, source='contact_set')
     products = ProductSerializer(many=True)
     supplier = serializers.SerializerMethodField()
