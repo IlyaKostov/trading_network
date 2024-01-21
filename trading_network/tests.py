@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import AccessToken
@@ -103,7 +104,7 @@ class LinkTestCase(APITestCase):
         }
 
         response_data = {
-            'id': 7,
+            'id': 8,
             'status_link': "Завод",
             'supplier': None,
             'name': "test_1",
@@ -114,7 +115,7 @@ class LinkTestCase(APITestCase):
             'debt': None,
             'contact': [
                 {
-                    'id': 7,
+                    'id': 8,
                     'email': 'test@test.ru',
                     'country': 'Russia',
                     'city': 'Moscow',
@@ -142,6 +143,20 @@ class LinkTestCase(APITestCase):
             response.json(),
             response_data
         )
+
+        # Проверка на запрос не активного пользователя
+        self.user.is_active = False
+        self.user.save()
+        response = self.client.post(
+            reverse('trading_network:link_create'),
+            data
+        )
+
+        self.assertEqual(
+            response.json(),
+            {'detail': 'User is inactive', 'code': 'user_inactive'}
+        )
+
 
     def test_link_list(self):
         """Тест чтение списка Звена торговой цепи"""
@@ -386,12 +401,15 @@ class ProductTestCase(APITestCase):
         self.user2 = User.objects.create(
             email='user2@test.com',
         )
-        self.client.force_authenticate(user=self.user2)
         self.user2.set_password('test')
         self.user2.save()
 
+        self.access_token = str(AccessToken.for_user(self.user2))
+        self.credentials = f'Bearer {self.access_token}'
+        self.client.credentials(HTTP_AUTHORIZATION=self.credentials)
+
         self.product = Product.objects.create(
-            name='test',
+            name='test33',
             model='test',
             date='2024-03-04',
         )
@@ -415,6 +433,18 @@ class ProductTestCase(APITestCase):
 
         self.assertTrue(
             Product.objects.all().exists()
+        )
+
+        # Проверка на запрос не активного пользователя
+        self.user2.is_active = False
+        self.user2.save()
+        response = self.client.post(
+            '/product/',
+            data=data
+        )
+        self.assertEqual(
+            response.json(),
+            {'detail': 'User is inactive', 'code': 'user_inactive'}
         )
 
     def test_get_list(self):
@@ -445,7 +475,7 @@ class ProductTestCase(APITestCase):
 
         self.assertEqual(
             response.json(),
-            {'id': self.product.id, 'name': 'test', 'model': 'test', 'date': '2024-03-04'}
+            {'id': self.product.id, 'name': 'test33', 'model': 'test', 'date': '2024-03-04'}
         )
 
     def test_product_update(self):
@@ -486,5 +516,70 @@ class ProductTestCase(APITestCase):
         self.assertEqual(
             Product.objects.filter(pk=self.product.id).exists(),
             False
+        )
+
+
+class LinkAdminTestCase(TestCase):
+    def setUp(self):
+
+        self.user = User.objects.create(
+            email='test@test.com',
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+        self.user.set_password('0000')
+        self.user.save()
+
+        self.client.force_login(self.user)
+
+        self.product = Product.objects.create(
+            name='test',
+            model='test',
+            date='2024-03-04',
+        )
+
+        self.link = Link.objects.create(
+            status_link='factory',
+            name='test_34',
+
+        )
+        contact_set = {
+            'email': 'test@test.com',
+            'country': 'Russia',
+            'city': 'Moscow',
+            'street': 'test',
+            'num_house': '12'
+        }
+
+        Contact.objects.create(link=self.link, **contact_set)
+        self.link.products.set([self.product])
+
+    def test_create_link(self):
+
+        post_data = {
+            'status_link': 'factory',
+            'supplier': self.link,
+            'name': 'test_1',
+            'products': [self.product.id],
+            'contact': [
+                {
+                    'email': 'test@test.ru',
+                    'country': 'Russia',
+                    'city': 'Moscow',
+                    'street': 'test',
+                    'num_house': '12'
+                }
+            ]
+        }
+
+        url = reverse('admin:trading_network_link_add')
+
+        response = self.client.post(url, data=post_data)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            Link.objects.count(), 1
         )
 
