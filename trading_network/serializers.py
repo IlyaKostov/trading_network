@@ -50,17 +50,19 @@ class LinkSerializer(RepresentationMixin, serializers.ModelSerializer):
 
         instance.save()
 
-        contact_data = validated_data.pop('contact_set')
-        contacts = instance.contact_set.all()
+        get_contact_data = validated_data.get('contact_set')
+        if get_contact_data:
+            contact_data = validated_data.pop('contact_set')
+            contacts = instance.contact_set.all()
 
-        for i, contact in enumerate(contacts):
-            contact_info = contact_data[i]
-            contact.email = contact_info.get('email', contact.email)
-            contact.country = contact_info.get('country', contact.country)
-            contact.city = contact_info.get('city', contact.city)
-            contact.street = contact_info.get('street', contact.street)
-            contact.num_house = contact_info.get('num_house', contact.num_house)
-            contact.save()
+            for i, contact in enumerate(contacts):
+                contact_info = contact_data[i]
+                contact.email = contact_info.get('email', contact.email)
+                contact.country = contact_info.get('country', contact.country)
+                contact.city = contact_info.get('city', contact.city)
+                contact.street = contact_info.get('street', contact.street)
+                contact.num_house = contact_info.get('num_house', contact.num_house)
+                contact.save()
 
         return instance
 
