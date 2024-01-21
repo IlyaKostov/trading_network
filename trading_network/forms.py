@@ -5,6 +5,7 @@ from trading_network.models import Link
 
 
 class LinkAdminForm(forms.ModelForm):
+    """Форма для валидации данных в Django-admin"""
     class Meta:
         model = Link
         fields = '__all__'

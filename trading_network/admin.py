@@ -1,5 +1,4 @@
 from django.contrib import admin, messages
-from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import ngettext

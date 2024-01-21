@@ -157,7 +157,6 @@ class LinkTestCase(APITestCase):
             {'detail': 'User is inactive', 'code': 'user_inactive'}
         )
 
-
     def test_link_list(self):
         """Тест чтение списка Звена торговой цепи"""
         response = self.client.get(
@@ -582,4 +581,3 @@ class LinkAdminTestCase(TestCase):
         self.assertEqual(
             Link.objects.count(), 1
         )
-
